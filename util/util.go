@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -14,7 +15,8 @@ func ReadFile(filePath string) (string, error) {
 		return "", err
 	}
 
-	return string(file), nil
+	res := string(file)
+	return strings.Trim(res, "\n"), nil
 }
 
 func ReadFileSplit(filePath string) ([]string, error) {
