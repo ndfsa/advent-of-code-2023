@@ -1,4 +1,4 @@
-package day04
+package day05
 
 import (
 	"testing"
@@ -7,17 +7,17 @@ import (
 )
 
 func TestSolvePart1Example(t *testing.T) {
-	util.RunSolution(t, SolvePart1, "./example.txt", 13)
+	util.RunSolution(t, SolvePart1, "./example.txt", 35)
 }
 
 func TestSolvePart1(t *testing.T) {
-	util.RunSolution(t, SolvePart1, "./input.txt", 22193)
+	util.RunSolution(t, SolvePart1, "./input.txt", 662197086)
 }
 
 func TestSolvePart2Example(t *testing.T) {
-	util.RunSolution(t, SolvePart2, "./example.txt", 30)
+	util.RunSolution(t, SolvePart2, "./example.txt", 46)
 }
 
 func TestSolvePart2(t *testing.T) {
-	util.RunSolution(t, SolvePart2, "./input.txt", 5625994)
+	util.RunSolution(t, SolvePart2, "./input.txt", 0)
 }
