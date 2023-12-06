@@ -9,13 +9,17 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+type Range struct {
+	start int
+	end   int
+}
+
 type RangeMap struct {
-	start  int
-	end    int
+	rang   Range
 	offset int
 }
 
-func (r RangeMap) fits(val int) bool {
+func (r Range) contains(val int) bool {
 	return r.start <= val && val <= r.end
 }
 
@@ -46,7 +50,7 @@ func parseInput(input string) ([]int, []AlmanacMap) {
 				&source,
 				&length)
 			almanacMap.ranges = append(almanacMap.ranges,
-				RangeMap{start: source, end: source + length - 1, offset: dest - source})
+				RangeMap{rang: Range{start: source, end: source + length - 1}, offset: dest - source})
 		}
 
 		almanac = append(almanac, almanacMap)
@@ -59,7 +63,7 @@ func createFunction(almanac []AlmanacMap) func(int) int {
 	return func(i int) int {
 		for _, almanacMap := range almanac {
 			for _, rangeMap := range almanacMap.ranges {
-				if rangeMap.fits(i) {
+				if rangeMap.rang.contains(i) {
 					i = rangeMap.execute(i)
 					break
 				}
@@ -96,36 +100,32 @@ func SolvePart2(filePath string) (int, error) {
 	for i, j := 0, len(almanac)-1; i < j; i, j = i+1, j-1 {
 		almanac[i], almanac[j] = almanac[j], almanac[i]
 	}
+
 	for i := range almanac {
 		for j := range almanac[i].ranges {
 			offset := almanac[i].ranges[j].offset
-			almanac[i].ranges[j].start += offset
-			almanac[i].ranges[j].end += offset
+			almanac[i].ranges[j].rang.start += offset
+			almanac[i].ranges[j].rang.end += offset
 			almanac[i].ranges[j].offset = -offset
-
 		}
 	}
 
-	seedsRanges := make([]RangeMap, 0)
-	minimum := 1 << 31
+	seedsRanges := make([]Range, 0)
 	for i := range seeds {
 		if i%2 == 1 {
-			seedsRanges = append(seedsRanges, RangeMap{start: seeds[i-1], end: seeds[i-1] + seeds[i] - 1})
-		} else if seeds[i] < minimum {
-			minimum = seeds[i]
+			seedsRanges = append(seedsRanges, Range{start: seeds[i-1], end: seeds[i-1] + seeds[i] - 1})
 		}
 	}
-
-	minimum /= 10
 
 	fInv := createFunction(almanac)
-	for {
-		seed := fInv(minimum)
+	for i := 0; i < 1<<31; i++ {
+		seed := fInv(i)
 		for _, r := range seedsRanges {
-			if r.fits(seed) {
-				return minimum, nil
+			if r.contains(seed) {
+				return i, nil
 			}
 		}
-		minimum++
 	}
+
+	return 0, nil
 }

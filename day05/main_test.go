@@ -19,5 +19,5 @@ func TestSolvePart2Example(t *testing.T) {
 }
 
 func TestSolvePart2(t *testing.T) {
-	util.RunSolution(t, SolvePart2, "./input.txt", 0)
+	util.RunSolution(t, SolvePart2, "./input.txt", 52510809)
 }

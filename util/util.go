@@ -38,7 +38,7 @@ func RunSolution[T comparable](
 	t *testing.T,
 	solution func(string) (T, error),
 	filePath string,
-	result T) {
+	expected T) {
 
 	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
 		t.Skip(err)
@@ -50,8 +50,8 @@ func RunSolution[T comparable](
 		t.Fatal(err)
 	}
 
-	if res != result {
-		t.Fatal(fmt.Sprintf("incorrect: %v", res))
+	if res != expected {
+		t.Fatal(fmt.Sprintf("incorrect: %v, expected: %v", res, expected))
 	}
 	t.Logf("res: %v", res)
 }
