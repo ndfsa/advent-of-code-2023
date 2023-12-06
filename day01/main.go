@@ -10,21 +10,21 @@ func isDigit(b byte) bool {
 	return b >= '0' && b <= '9'
 }
 
-func SolvePart1(filePath string, prealloc int) (uint64, error) {
-	input, err := util.ReadLines(filePath, prealloc)
+func SolvePart1(filePath string) (int, error) {
+	lines, err := util.ReadFileSplit(filePath)
 
 	if err != nil {
 		return 0, err
 	}
 
-	var fRes uint64 = 0
-	for _, line := range input {
-		var pRes uint64 = 0
+	fRes := 0
+	for _, line := range lines {
+		pRes := 0
 		for i := 0; i < len(line); i++ {
 			ch := line[i]
 			if isDigit(ch) {
 				pRes *= 10
-				pRes += uint64(ch - '0')
+				pRes += int(ch - '0')
 				break
 			}
 		}
@@ -32,7 +32,7 @@ func SolvePart1(filePath string, prealloc int) (uint64, error) {
 			ch := line[i]
 			if isDigit(ch) {
 				pRes *= 10
-				pRes += uint64(ch - '0')
+				pRes += int(ch - '0')
 				break
 			}
 		}
@@ -42,10 +42,14 @@ func SolvePart1(filePath string, prealloc int) (uint64, error) {
 	return fRes, nil
 }
 
-func SolvePart2(filePath string, prealloc int) (uint64, error) {
-	input, err := util.ReadLines(filePath, prealloc)
+func SolvePart2(filePath string) (int, error) {
+	lines, err := util.ReadFileSplit(filePath)
 
-	var literal []string = []string{
+	if err != nil {
+		return 0, err
+	}
+
+	var lookup []string = []string{
 		"one",
 		"two",
 		"three",
@@ -56,25 +60,21 @@ func SolvePart2(filePath string, prealloc int) (uint64, error) {
 		"eight",
 		"nine"}
 
-	if err != nil {
-		return 0, err
-	}
-
-	var fRes uint64 = 0
-	for _, line := range input {
-		var pRes uint64 = 0
+	fRes := 0
+	for _, line := range lines {
+		pRes := 0
 	pre:
 		for i := 0; i < len(line); i++ {
 			ch := line[i]
 			if isDigit(ch) {
 				pRes *= 10
-				pRes += uint64(ch - '0')
+				pRes += int(ch - '0')
 				break
 			}
-			for idx, prefix := range literal {
+			for idx, prefix := range lookup {
 				if strings.HasPrefix(line[i:], prefix) {
 					pRes *= 10
-					pRes += uint64(idx + 1)
+					pRes += int(idx + 1)
 					break pre
 				}
 			}
@@ -84,13 +84,13 @@ func SolvePart2(filePath string, prealloc int) (uint64, error) {
 			ch := line[i]
 			if isDigit(ch) {
 				pRes *= 10
-				pRes += uint64(ch - '0')
+				pRes += int(ch - '0')
 				break
 			}
-			for idx, suffix := range literal {
+			for idx, suffix := range lookup {
 				if strings.HasSuffix(line[:i+1], suffix) {
 					pRes *= 10
-					pRes += uint64(idx + 1)
+					pRes += int(idx + 1)
 					break post
 				}
 			}
