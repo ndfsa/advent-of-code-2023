@@ -2,9 +2,9 @@ package util
 
 import (
 	"errors"
+	"bufio"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -18,15 +18,18 @@ func ReadFile(filePath string) (string, error) {
 }
 
 func ReadFileSplit(filePath string) ([]string, error) {
-	input, err := ReadFile(filePath)
+    file, err := os.Open(filePath)
+    if err != nil {
+        return nil, err
+    }
+    defer file.Close()
 
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.SplitN(input, "\n", -1)
-
-	return lines, nil
+    var lines []string
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+        lines = append(lines, scanner.Text())
+    }
+    return lines, scanner.Err()
 }
 
 func RunSolution[T comparable](
@@ -50,3 +53,8 @@ func RunSolution[T comparable](
 	}
 	t.Logf("res: %v", res)
 }
+
+func IsDigit(b byte) bool {
+	return b >= '0' && b <= '9'
+}
+

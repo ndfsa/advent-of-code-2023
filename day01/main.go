@@ -6,10 +6,6 @@ import (
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
-func isDigit(b byte) bool {
-	return b >= '0' && b <= '9'
-}
-
 func SolvePart1(filePath string) (int, error) {
 	lines, err := util.ReadFileSplit(filePath)
 
@@ -22,7 +18,7 @@ func SolvePart1(filePath string) (int, error) {
 		pRes := 0
 		for i := 0; i < len(line); i++ {
 			ch := line[i]
-			if isDigit(ch) {
+			if util.IsDigit(ch) {
 				pRes *= 10
 				pRes += int(ch - '0')
 				break
@@ -30,7 +26,7 @@ func SolvePart1(filePath string) (int, error) {
 		}
 		for i := len(line) - 1; i >= 0; i-- {
 			ch := line[i]
-			if isDigit(ch) {
+			if util.IsDigit(ch) {
 				pRes *= 10
 				pRes += int(ch - '0')
 				break
@@ -66,7 +62,7 @@ func SolvePart2(filePath string) (int, error) {
 	pre:
 		for i := 0; i < len(line); i++ {
 			ch := line[i]
-			if isDigit(ch) {
+			if util.IsDigit(ch) {
 				pRes *= 10
 				pRes += int(ch - '0')
 				break
@@ -82,7 +78,7 @@ func SolvePart2(filePath string) (int, error) {
 	post:
 		for i := len(line) - 1; i >= 0; i-- {
 			ch := line[i]
-			if isDigit(ch) {
+			if util.IsDigit(ch) {
 				pRes *= 10
 				pRes += int(ch - '0')
 				break
