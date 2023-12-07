@@ -14,10 +14,10 @@ func TestSolvePart1(t *testing.T) {
 	util.RunSolution(t, SolvePart1, "./input.txt", 250474325)
 }
 
-// func TestSolvePart2Example(t *testing.T) {
-// 	util.RunSolution(t, SolvePart2, "./example.txt", 71503)
-// }
-//
-// func TestSolvePart2(t *testing.T) {
-// 	util.RunSolution(t, SolvePart2, "./input.txt", 39132886)
-// }
+func TestSolvePart2Example(t *testing.T) {
+	util.RunSolution(t, SolvePart2, "./example.txt", 5905)
+}
+
+func TestSolvePart2(t *testing.T) {
+	util.RunSolution(t, SolvePart2, "./input.txt", 0)
+}

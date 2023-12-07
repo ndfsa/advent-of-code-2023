@@ -34,6 +34,22 @@ var cardValue = map[byte]int{
 	'A': 12,
 }
 
+var cardValueModified = map[byte]int{
+	'J': 0,
+	'2': 1,
+	'3': 2,
+	'4': 3,
+	'5': 4,
+	'6': 5,
+	'7': 6,
+	'8': 7,
+	'9': 8,
+	'T': 9,
+	'Q': 10,
+	'K': 11,
+	'A': 12,
+}
+
 type Hand struct {
 	Bid   int
 	Cards []int
@@ -49,7 +65,7 @@ func (h Hand) lt(other Hand) bool {
 	return false
 }
 
-func (h *Hand) calculateType() {
+func (h *Hand) calculateType(joker bool) {
 	mp := make(map[int]int, 0)
 	for _, card := range h.Cards {
 		if _, ok := mp[card]; ok {
@@ -58,15 +74,30 @@ func (h *Hand) calculateType() {
 			mp[card] = 1
 		}
 	}
+	if joker {
+		if jk, ok := mp[cardValueModified['J']]; ok {
+			delete(mp, cardValueModified['J'])
+			maxValKey, maxVal := -1, 0
+			for k, v := range mp {
+				if v > maxVal {
+					maxValKey, maxVal = k, v
+				}
+			}
+			mp[maxValKey] += jk
+		}
+	}
+	keys := make([]int, 0, len(mp))
 	vals := make([]int, 0, len(mp))
-	for _, v := range mp {
+	for k, v := range mp {
+		keys = append(keys, k)
 		vals = append(vals, v)
 	}
+	maxVal := slices.Max(vals)
 	switch len(mp) {
 	case 1:
 		h.Type = FIVE_OF_A_KIND
 	case 2:
-		if slices.Max(vals) == 4 {
+		if maxVal == 4 {
 			h.Type = FOUR_OF_A_KIND
 		} else {
 			h.Type = FULL_HOUSE
@@ -84,7 +115,7 @@ func (h *Hand) calculateType() {
 	}
 }
 
-func parseInput(lines []string) []Hand {
+func parseInput(lines []string, joker bool) []Hand {
 	res := make([]Hand, 0, len(lines))
 	for _, line := range lines {
 		var cards string
@@ -94,14 +125,32 @@ func parseInput(lines []string) []Hand {
 
 		converted := make([]int, 0)
 		for _, card := range []byte(cards) {
-			converted = append(converted, cardValue[card])
+			if joker {
+				converted = append(converted, cardValueModified[card])
+			} else {
+				converted = append(converted, cardValue[card])
+			}
 		}
 		res = append(res, Hand{Bid: bid, Cards: converted})
 	}
-	for i := range res {
-		res[i].calculateType()
+	return res
+}
+
+func solveProblem(lines []string, joker bool) int {
+	hands := parseInput(lines, false)
+	for i := range hands {
+		hands[i].calculateType(false)
 	}
 
+	sort.Slice(hands, func(i, j int) bool {
+		return hands[i].Type == hands[j].Type &&
+			hands[i].lt(hands[j]) ||
+			hands[i].Type < hands[j].Type
+	})
+	res := 0
+	for i, hand := range hands {
+		res += (i + 1) * hand.Bid
+	}
 	return res
 }
 
@@ -112,26 +161,15 @@ func SolvePart1(filePath string) (int, error) {
 		return 0, err
 	}
 
-	hands := parseInput(lines)
-	sort.Slice(hands, func(i, j int) bool {
-		return hands[i].Type == hands[j].Type &&
-			hands[i].lt(hands[j]) ||
-			hands[i].Type < hands[j].Type
-	})
-	res := 0
-	for i, hand := range hands {
-		res += (i + 1) * hand.Bid
-	}
-
-	return res, nil
+	return solveProblem(lines, false), nil
 }
 
 func SolvePart2(filePath string) (int, error) {
-	_, err := util.ReadFile(filePath)
+	lines, err := util.ReadFileSplit(filePath)
 
 	if err != nil {
 		return 0, err
 	}
 
-	return 0, nil
+	return solveProblem(lines, true), nil
 }
