@@ -51,7 +51,7 @@ func RunSolution[T comparable](
 	}
 
 	if res != expected {
-		t.Fatal(fmt.Sprintf("incorrect: %v, expected: %v", res, expected))
+		t.Fatal(fmt.Sprintf("\nincorrect: %v\nexpected: %v", res, expected))
 	}
 	t.Logf("res: %v", res)
 }
@@ -59,4 +59,3 @@ func RunSolution[T comparable](
 func IsDigit(b byte) bool {
 	return b >= '0' && b <= '9'
 }
-
