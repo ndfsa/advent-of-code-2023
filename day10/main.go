@@ -7,29 +7,24 @@ import (
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
-type Point struct {
-	row int
-	col int
-}
-
 type Blueprint struct {
 	data []string
 }
 
-func (b Blueprint) getPipe(p Point) (byte, error) {
+func (b Blueprint) getPipe(p util.Point) (byte, error) {
 	rowMax, colMax := len(b.data), len(b.data[0])
-	if p.row < 0 || p.row >= rowMax || p.col < 0 || p.col >= colMax {
+	if p.Row < 0 || p.Row >= rowMax || p.Col < 0 || p.Col >= colMax {
 		return 0, errors.New("invalid position")
 	}
 
-	return b.data[p.row][p.col], nil
+	return b.data[p.Row][p.Col], nil
 }
 
-func (b Blueprint) getStartAdjacent() (Point, Point, Point) {
-	var pipesStart Point
+func (b Blueprint) getStartAdjacent() (util.Point, util.Point, util.Point) {
+	var pipesStart util.Point
 	for idx, row := range b.data {
 		if col := strings.IndexByte(row, 'S'); col != -1 {
-			pipesStart = Point{row: idx, col: col}
+			pipesStart = util.Point{Row: idx, Col: col}
 			break
 		}
 	}
@@ -37,33 +32,33 @@ func (b Blueprint) getStartAdjacent() (Point, Point, Point) {
 	return pipesStart, startNext[0], startNext[1]
 }
 
-func (b Blueprint) findNext(p Point) []Point {
+func (b Blueprint) findNext(p util.Point) []util.Point {
 	currentPipe, _ := b.getPipe(p)
 
-	possibleNext := []Point{
-		{p.row - 1, p.col},
-		{p.row + 1, p.col},
-		{p.row, p.col - 1},
-		{p.row, p.col + 1},
+	possibleNext := []util.Point{
+		{Row: p.Row - 1, Col: p.Col},
+		{Row: p.Row + 1, Col: p.Col},
+		{Row: p.Row, Col: p.Col - 1},
+		{Row: p.Row, Col: p.Col + 1},
 	}
 
-	next := []Point{}
+	next := []util.Point{}
 
 	for _, np := range possibleNext {
 		pipe, err := b.getPipe(np)
 		if err != nil {
 			continue
 		}
-		if np.row < p.row && (pipe == '|' || pipe == '7' || pipe == 'F') &&
+		if np.Row < p.Row && (pipe == '|' || pipe == '7' || pipe == 'F') &&
 			(currentPipe == 'S' || currentPipe == '|' || currentPipe == 'J' || currentPipe == 'L') {
 			next = append(next, np)
-		} else if np.row > p.row && (pipe == '|' || pipe == 'L' || pipe == 'J') &&
+		} else if np.Row > p.Row && (pipe == '|' || pipe == 'L' || pipe == 'J') &&
 			(currentPipe == 'S' || currentPipe == '|' || currentPipe == '7' || currentPipe == 'F') {
 			next = append(next, np)
-		} else if np.col < p.col && (pipe == '-' || pipe == 'L' || pipe == 'F') &&
+		} else if np.Col < p.Col && (pipe == '-' || pipe == 'L' || pipe == 'F') &&
 			(currentPipe == 'S' || currentPipe == '-' || currentPipe == '7' || currentPipe == 'J') {
 			next = append(next, np)
-		} else if np.col > p.col && (pipe == '-' || pipe == '7' || pipe == 'J') &&
+		} else if np.Col > p.Col && (pipe == '-' || pipe == '7' || pipe == 'J') &&
 			(currentPipe == 'S' || currentPipe == '-' || currentPipe == 'L' || currentPipe == 'F') {
 			next = append(next, np)
 		}
@@ -72,10 +67,10 @@ func (b Blueprint) findNext(p Point) []Point {
 }
 
 type State struct {
-	pos      Point
-	start    Point
-	end      Point
-	previous map[Point]Point
+	pos      util.Point
+	start    util.Point
+	end      util.Point
+	previous map[util.Point]util.Point
 }
 
 func (s *State) findLoop(b Blueprint) {
@@ -112,7 +107,7 @@ func SolvePart1(filePath string) (int, error) {
 	b := parseInput(lines)
 	pipesStart, start, end := b.getStartAdjacent()
 
-	state := State{start: pipesStart, end: end, pos: start, previous: map[Point]Point{start: pipesStart}}
+	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Point]util.Point{start: pipesStart}}
 	state.findLoop(b)
 
 	return len(state.previous) / 2, nil
@@ -128,7 +123,7 @@ func SolvePart2(filePath string) (int, error) {
 	b := parseInput(lines)
 	pipesStart, start, end := b.getStartAdjacent()
 
-	state := State{start: pipesStart, end: end, pos: start, previous: map[Point]Point{start: pipesStart}}
+	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Point]util.Point{start: pipesStart}}
 	state.findLoop(b)
 
 	area := 0
@@ -138,7 +133,7 @@ func SolvePart2(filePath string) (int, error) {
 	for i := 0; i < len(state.previous); i++ {
 		prev := state.previous[curr]
 
-		area +=  curr.row*prev.col - prev.row*curr.col
+		area += curr.Row*prev.Col - prev.Row*curr.Col
 
 		curr = prev
 	}

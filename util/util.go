@@ -75,3 +75,15 @@ func LCM(integers []int) int {
 
 	return LCM([]int{integers[0], LCM(integers[1:])})
 }
+
+func AbsDiff(x, y int) int {
+	if x > y {
+		return x - y
+	}
+	return y - x
+}
+
+type Point struct {
+	Row int
+	Col int
+}
