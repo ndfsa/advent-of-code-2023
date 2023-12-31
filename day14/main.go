@@ -1,6 +1,7 @@
 package day14
 
 import (
+	"crypto/md5"
 	"fmt"
 
 	"github.com/ndfsa/advent-of-code-2023/util"
@@ -13,96 +14,110 @@ var (
 	DIR_WEST  = util.Point{Row: 0, Col: -1}
 )
 
+const (
+	TYPE_EMPTY byte = iota
+	TYPE_ROUNDED
+	TYPE_CUBED
+)
+
 type Dish struct {
-	roundedRocks map[util.Point]struct{}
-	cubeRocks    map[util.Point]struct{}
-	height       int
-	width        int
+	rocks  [][]byte
+	height int
+	width  int
 }
 
-func (d Dish) String() string {
-	res := ""
-	for i := 0; i < d.height; i++ {
-		for j := 0; j < d.width; j++ {
-			pos := util.Point{Row: i, Col: j}
-			if _, ok := d.roundedRocks[pos]; ok {
-				res += "O"
-				continue
-			}
-
-			if _, ok := d.cubeRocks[pos]; ok {
-				res += "#"
-				continue
-			}
-			res += "."
+func (d Dish) stateHash() string {
+	data := []byte{}
+	for _, row := range d.rocks {
+		for _, b := range row {
+			data = append(data, b)
 		}
-		res += "\n"
 	}
 
-	return res
+	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
 func (d *Dish) calculateLoad() int {
 	res := 0
-	for rock := range d.roundedRocks {
-		res += d.height - rock.Row
+	for i := 0; i < d.height; i++ {
+		for j := 0; j < d.width; j++ {
+			if d.rocks[i][j] == TYPE_ROUNDED {
+				res += d.height - i
+			}
+		}
 	}
 	return res
 }
 
+func (d Dish) valid(pos util.Point) bool {
+	return pos.Row >= 0 &&
+		pos.Row < d.height &&
+		pos.Col >= 0 &&
+		pos.Col < d.width
+}
+
 func (d *Dish) tilt(direction util.Point) {
-	for {
-		nextRoundedRocks := make(map[util.Point]struct{})
-		moved := 0
-		for rock := range d.roundedRocks {
-			nextPos := rock.Sum(direction)
+	var i, j int
+	switch direction {
+	case DIR_NORTH:
+		i, j = 1, 0
+	case DIR_SOUTH:
+		i, j = d.height-2, 0
+	case DIR_EAST:
+		i, j = 0, d.width-2
+	case DIR_WEST:
+		i, j = 0, 1
+	}
+	for i >= 0 && i < d.height && j >= 0 && j < d.width {
 
-			if nextPos.Row < 0 ||
-				nextPos.Row > d.height ||
-				nextPos.Col < 0 ||
-				nextPos.Col > d.width {
+		pos := util.Point{Row: i, Col: j}
+		if d.rocks[i][j] == TYPE_ROUNDED {
+			nextPos := pos.Add(direction)
 
-				nextRoundedRocks[rock] = struct{}{}
-				continue
+			for d.valid(nextPos) && d.rocks[nextPos.Row][nextPos.Col] == TYPE_EMPTY {
+				nextPos = nextPos.Add(direction)
 			}
+			nextPos = nextPos.Sus(direction)
 
-			if _, ok := d.roundedRocks[nextPos]; ok {
-				nextRoundedRocks[rock] = struct{}{}
-				continue
-			}
-
-			if _, ok := d.cubeRocks[nextPos]; ok {
-				nextRoundedRocks[rock] = struct{}{}
-				continue
-			}
-
-			nextRoundedRocks[nextPos] = struct{}{}
-			moved++
+			d.rocks[i][j] = TYPE_EMPTY
+			d.rocks[nextPos.Row][nextPos.Col] = TYPE_ROUNDED
 		}
 
-		if moved == 0 {
-			break
+		switch direction {
+		case DIR_NORTH, DIR_SOUTH:
+			j++
+			if j == d.width {
+				i -= direction.Row
+				j = 0
+			}
+		case DIR_EAST, DIR_WEST:
+			i++
+			if i == d.height {
+				j -= direction.Col
+				i = 0
+			}
 		}
-		d.roundedRocks = nextRoundedRocks
-		moved = 0
 	}
 }
 
 func parseInput(lines []string) Dish {
 	dish := Dish{
-		roundedRocks: make(map[util.Point]struct{}),
-		cubeRocks:    make(map[util.Point]struct{}),
-		height:       len(lines),
-		width:        len(lines[0])}
-	for r, line := range lines {
-		for c, ch := range line {
+		rocks:  [][]byte{},
+		height: len(lines),
+		width:  len(lines[0])}
+	for _, line := range lines {
+		row := []byte{}
+		for _, ch := range line {
 			switch ch {
+			case '.':
+				row = append(row, TYPE_EMPTY)
 			case 'O':
-				dish.roundedRocks[util.Point{Row: r, Col: c}] = struct{}{}
+				row = append(row, TYPE_ROUNDED)
 			case '#':
-				dish.cubeRocks[util.Point{Row: r, Col: c}] = struct{}{}
+				row = append(row, TYPE_CUBED)
 			}
 		}
+		dish.rocks = append(dish.rocks, row)
 	}
 	return dish
 }
@@ -128,12 +143,23 @@ func SolvePart2(filePath string) (int, error) {
 	}
 
 	dish := parseInput(lines)
-	dish.tilt(DIR_NORTH)
-	dish.tilt(DIR_WEST)
-	dish.tilt(DIR_SOUTH)
-	dish.tilt(DIR_EAST)
+	states := make(map[string]int)
 
-	fmt.Printf("dish:\n%v\n", dish)
+	limit := 1_000_000_000
+
+	for i := 0; i < limit; i++ {
+		dish.tilt(DIR_NORTH)
+		dish.tilt(DIR_WEST)
+		dish.tilt(DIR_SOUTH)
+		dish.tilt(DIR_EAST)
+
+		hash := dish.stateHash()
+		if prev, ok := states[hash]; ok {
+			limit = (limit-prev)%(i-prev) + i
+		} else {
+			states[hash] = i
+		}
+	}
 
 	return dish.calculateLoad(), nil
 }

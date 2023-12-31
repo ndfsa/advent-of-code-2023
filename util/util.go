@@ -88,8 +88,12 @@ type Point struct {
 	Col int
 }
 
-func (p Point) Sum(other Point) Point {
+func (p Point) Add(other Point) Point {
 	return Point{Row: p.Row + other.Row, Col: p.Col + other.Col}
+}
+
+func (p Point) Sus(other Point) Point {
+	return Point{Row: p.Row - other.Row, Col: p.Col - other.Col}
 }
 
 func SlicesEqual[T comparable](a, b []T) bool {
