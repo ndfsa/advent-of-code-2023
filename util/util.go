@@ -87,3 +87,15 @@ type Point struct {
 	Row int
 	Col int
 }
+
+func SlicesEqual[T comparable](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		if b[k] != v {
+			return false
+		}
+	}
+	return true
+}
