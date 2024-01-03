@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	DIR_NORTH = util.Point{Row: -1, Col: 0}
-	DIR_SOUTH = util.Point{Row: 1, Col: 0}
-	DIR_EAST  = util.Point{Row: 0, Col: 1}
-	DIR_WEST  = util.Point{Row: 0, Col: -1}
+	DIR_NORTH = util.DIR_UP
+	DIR_SOUTH = util.DIR_DOWN
+	DIR_EAST  = util.DIR_RIGHT
+	DIR_WEST  = util.DIR_LEFT
 )
 
 const (

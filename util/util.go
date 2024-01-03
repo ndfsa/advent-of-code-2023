@@ -88,6 +88,11 @@ type Point struct {
 	Col int
 }
 
+var DIR_UP = Point{Row: -1, Col: 0}
+var DIR_DOWN = Point{Row: 1, Col: 0}
+var DIR_RIGHT = Point{Row: 0, Col: 1}
+var DIR_LEFT = Point{Row: 0, Col: -1}
+
 func (p Point) Add(other Point) Point {
 	return Point{Row: p.Row + other.Row, Col: p.Col + other.Col}
 }
