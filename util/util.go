@@ -97,6 +97,29 @@ func (p Vec2) Add(other Vec2) Vec2 {
 	return Vec2{Row: p.Row + other.Row, Col: p.Col + other.Col}
 }
 
+func (p Vec2) AddMult(other Vec2, mag int) Vec2 {
+	return Vec2{Row: p.Row + other.Row * mag, Col: p.Col + other.Col * mag}
+}
+
+func (p Vec2) HammiltonDist(other Vec2) int {
+	sus := p.Sus(other)
+	res := 0
+
+	if sus.Row < 0 {
+		res += -sus.Row
+	} else {
+		res += sus.Row
+	}
+
+	if sus.Col < 0 {
+		res += -sus.Col
+	} else {
+		res += sus.Col
+	}
+
+	return res
+}
+
 func (p Vec2) Sus(other Vec2) Vec2 {
 	return Vec2{Row: p.Row - other.Row, Col: p.Col - other.Col}
 }
