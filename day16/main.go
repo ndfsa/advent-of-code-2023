@@ -22,8 +22,8 @@ var (
 )
 
 type Photon struct {
-	pos util.Point
-	dir util.Point
+	pos util.Vec2
+	dir util.Vec2
 }
 
 func (p Photon) String() string {
@@ -50,11 +50,11 @@ func (l Photon) move(field [][]byte) []Photon {
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_MIRROR:
-		l.dir = util.Point{Row: -l.dir.Col, Col: -l.dir.Row}
+		l.dir = util.Vec2{Row: -l.dir.Col, Col: -l.dir.Row}
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_MIRROR_BACK:
-		l.dir = util.Point{Row: l.dir.Col, Col: l.dir.Row}
+		l.dir = util.Vec2{Row: l.dir.Col, Col: l.dir.Row}
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_SPLITTER_H:
@@ -109,7 +109,7 @@ func SolvePart1(filePath string) (int, error) {
 
 	field := parseInput(lines)
 
-	queue := map[Photon]struct{}{{pos: util.Point{Row: 0, Col: 0}, dir: DIR_RIGHT}: {}}
+	queue := map[Photon]struct{}{{pos: util.Vec2{Row: 0, Col: 0}, dir: DIR_RIGHT}: {}}
 	next := map[Photon][]Photon{}
 
 	for len(queue) > 0 {
@@ -127,7 +127,7 @@ func SolvePart1(filePath string) (int, error) {
 		queue = nextQueue
 	}
 
-	energized := make(map[util.Point]struct{}, len(next))
+	energized := make(map[util.Vec2]struct{}, len(next))
 	for photon := range next {
 		energized[photon.pos] = struct{}{}
 	}
@@ -147,15 +147,15 @@ func SolvePart2(filePath string) (int, error) {
 	startPhotons := []Photon{}
 	for i := 0; i < len(field); i++ {
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Point{Row: i, Col: 0}, dir: DIR_RIGHT})
+			Photon{pos: util.Vec2{Row: i, Col: 0}, dir: DIR_RIGHT})
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Point{Row: i, Col: len(field[0]) - 1}, dir: DIR_LEFT})
+			Photon{pos: util.Vec2{Row: i, Col: len(field[0]) - 1}, dir: DIR_LEFT})
 	}
 	for i := 0; i < len(field[0]); i++ {
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Point{Row: 0, Col: i}, dir: DIR_DOWN})
+			Photon{pos: util.Vec2{Row: 0, Col: i}, dir: DIR_DOWN})
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Point{Row: len(field) - 1, Col: i}, dir: DIR_UP})
+			Photon{pos: util.Vec2{Row: len(field) - 1, Col: i}, dir: DIR_UP})
 	}
 
 	cache := map[Photon][]Photon{}
@@ -185,7 +185,7 @@ func SolvePart2(filePath string) (int, error) {
 			queue = nextQueue
 		}
 
-		dedup := map[util.Point]struct{}{}
+		dedup := map[util.Vec2]struct{}{}
 		for photon := range energized {
 			dedup[photon.pos] = struct{}{}
 		}

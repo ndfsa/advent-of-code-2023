@@ -49,14 +49,14 @@ func (d *Dish) calculateLoad() int {
 	return res
 }
 
-func (d Dish) valid(pos util.Point) bool {
+func (d Dish) valid(pos util.Vec2) bool {
 	return pos.Row >= 0 &&
 		pos.Row < d.height &&
 		pos.Col >= 0 &&
 		pos.Col < d.width
 }
 
-func (d *Dish) tilt(direction util.Point) {
+func (d *Dish) tilt(direction util.Vec2) {
 	var i, j int
 	switch direction {
 	case DIR_NORTH:
@@ -70,7 +70,7 @@ func (d *Dish) tilt(direction util.Point) {
 	}
 	for i >= 0 && i < d.height && j >= 0 && j < d.width {
 
-		pos := util.Point{Row: i, Col: j}
+		pos := util.Vec2{Row: i, Col: j}
 		if d.rocks[i][j] == TYPE_ROUNDED {
 			nextPos := pos.Add(direction)
 

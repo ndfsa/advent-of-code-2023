@@ -83,22 +83,22 @@ func AbsDiff(x, y int) int {
 	return y - x
 }
 
-type Point struct {
+type Vec2 struct {
 	Row int
 	Col int
 }
 
-var DIR_UP = Point{Row: -1, Col: 0}
-var DIR_DOWN = Point{Row: 1, Col: 0}
-var DIR_RIGHT = Point{Row: 0, Col: 1}
-var DIR_LEFT = Point{Row: 0, Col: -1}
+var DIR_UP = Vec2{Row: -1, Col: 0}
+var DIR_DOWN = Vec2{Row: 1, Col: 0}
+var DIR_RIGHT = Vec2{Row: 0, Col: 1}
+var DIR_LEFT = Vec2{Row: 0, Col: -1}
 
-func (p Point) Add(other Point) Point {
-	return Point{Row: p.Row + other.Row, Col: p.Col + other.Col}
+func (p Vec2) Add(other Vec2) Vec2 {
+	return Vec2{Row: p.Row + other.Row, Col: p.Col + other.Col}
 }
 
-func (p Point) Sus(other Point) Point {
-	return Point{Row: p.Row - other.Row, Col: p.Col - other.Col}
+func (p Vec2) Sus(other Vec2) Vec2 {
+	return Vec2{Row: p.Row - other.Row, Col: p.Col - other.Col}
 }
 
 func SlicesEqual[T comparable](a, b []T) bool {

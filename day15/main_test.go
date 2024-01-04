@@ -6,7 +6,7 @@ import (
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
-func TestSolvePart1Example2(t *testing.T) {
+func TestSolvePart1Example(t *testing.T) {
 	util.RunSolution(t, SolvePart1, "./example.txt", 1320)
 }
 

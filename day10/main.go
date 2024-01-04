@@ -11,7 +11,7 @@ type Blueprint struct {
 	data []string
 }
 
-func (b Blueprint) getPipe(p util.Point) (byte, error) {
+func (b Blueprint) getPipe(p util.Vec2) (byte, error) {
 	rowMax, colMax := len(b.data), len(b.data[0])
 	if p.Row < 0 || p.Row >= rowMax || p.Col < 0 || p.Col >= colMax {
 		return 0, errors.New("invalid position")
@@ -20,11 +20,11 @@ func (b Blueprint) getPipe(p util.Point) (byte, error) {
 	return b.data[p.Row][p.Col], nil
 }
 
-func (b Blueprint) getStartAdjacent() (util.Point, util.Point, util.Point) {
-	var pipesStart util.Point
+func (b Blueprint) getStartAdjacent() (util.Vec2, util.Vec2, util.Vec2) {
+	var pipesStart util.Vec2
 	for idx, row := range b.data {
 		if col := strings.IndexByte(row, 'S'); col != -1 {
-			pipesStart = util.Point{Row: idx, Col: col}
+			pipesStart = util.Vec2{Row: idx, Col: col}
 			break
 		}
 	}
@@ -32,17 +32,17 @@ func (b Blueprint) getStartAdjacent() (util.Point, util.Point, util.Point) {
 	return pipesStart, startNext[0], startNext[1]
 }
 
-func (b Blueprint) findNext(p util.Point) []util.Point {
+func (b Blueprint) findNext(p util.Vec2) []util.Vec2 {
 	currentPipe, _ := b.getPipe(p)
 
-	possibleNext := []util.Point{
+	possibleNext := []util.Vec2{
 		{Row: p.Row - 1, Col: p.Col},
 		{Row: p.Row + 1, Col: p.Col},
 		{Row: p.Row, Col: p.Col - 1},
 		{Row: p.Row, Col: p.Col + 1},
 	}
 
-	next := []util.Point{}
+	next := []util.Vec2{}
 
 	for _, np := range possibleNext {
 		pipe, err := b.getPipe(np)
@@ -67,10 +67,10 @@ func (b Blueprint) findNext(p util.Point) []util.Point {
 }
 
 type State struct {
-	pos      util.Point
-	start    util.Point
-	end      util.Point
-	previous map[util.Point]util.Point
+	pos      util.Vec2
+	start    util.Vec2
+	end      util.Vec2
+	previous map[util.Vec2]util.Vec2
 }
 
 func (s *State) findLoop(b Blueprint) {
@@ -107,7 +107,7 @@ func SolvePart1(filePath string) (int, error) {
 	b := parseInput(lines)
 	pipesStart, start, end := b.getStartAdjacent()
 
-	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Point]util.Point{start: pipesStart}}
+	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Vec2]util.Vec2{start: pipesStart}}
 	state.findLoop(b)
 
 	return len(state.previous) / 2, nil
@@ -123,7 +123,7 @@ func SolvePart2(filePath string) (int, error) {
 	b := parseInput(lines)
 	pipesStart, start, end := b.getStartAdjacent()
 
-	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Point]util.Point{start: pipesStart}}
+	state := State{start: pipesStart, end: end, pos: start, previous: map[util.Vec2]util.Vec2{start: pipesStart}}
 	state.findLoop(b)
 
 	area := 0

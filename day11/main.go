@@ -4,14 +4,14 @@ import (
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
-func parseInput(lines []string, expansion int) []util.Point {
-	galaxies := []util.Point{}
+func parseInput(lines []string, expansion int) []util.Vec2 {
+	galaxies := []util.Vec2{}
 	rowGravity := make([]bool, len(lines))
 	colGravity := make([]bool, len(lines[0]))
 	for i, line := range lines {
 		for j, ch := range line {
 			if ch != '.' {
-				galaxies = append(galaxies, util.Point{Row: i, Col: j})
+				galaxies = append(galaxies, util.Vec2{Row: i, Col: j})
 				rowGravity[i] = true
 				colGravity[j] = true
 			}
