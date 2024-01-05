@@ -7,15 +7,52 @@ import (
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
+type PartRange struct {
+	ranges map[byte][2]int
+}
+
+func (p *PartRange) adjust(r Rule, value bool) {
+	if r.operation == 0 {
+		return
+	}
+
+	rn := p.ranges[r.parameter]
+	if value {
+		switch r.operation {
+		case '>':
+			if rn[0] <= r.value {
+				rn[0] = r.value + 1
+			}
+		case '<':
+			if rn[1] >= r.value {
+				rn[1] = r.value - 1
+			}
+		}
+	} else {
+		switch r.operation {
+		case '>':
+			if rn[1] > r.value {
+				rn[1] = r.value
+			}
+		case '<':
+			if rn[0] < r.value {
+				rn[0] = r.value
+			}
+		}
+	}
+	p.ranges[r.parameter] = rn
+}
+
 type Part struct {
-	x int
-	m int
-	a int
-	s int
+	parameters map[byte]int
 }
 
 func (p Part) score() int {
-	return p.x + p.m + p.a + p.s
+	res := 0
+	for _, val := range p.parameters {
+		res += val
+	}
+	return res
 }
 
 type Rule struct {
@@ -29,23 +66,18 @@ type Workflow struct {
 	rules []Rule
 }
 
+type RulePos struct {
+	name string
+	pos  int
+}
+
 func (w Workflow) execute(p Part) string {
 	for _, rule := range w.rules {
 		if rule.operation == 0 {
 			return rule.next
 		}
 
-		var partValue int
-		switch rule.parameter {
-		case 'x':
-			partValue = p.x
-		case 'm':
-			partValue = p.m
-		case 'a':
-			partValue = p.a
-		case 's':
-			partValue = p.s
-		}
+		var partValue int = p.parameters[rule.parameter]
 
 		switch rule.operation {
 		case '>':
@@ -87,13 +119,17 @@ func parseInput(input string) (map[string]Workflow, []Part) {
 
 	parts := []Part{}
 	for _, partStr := range strings.Split(partsInput, "\n") {
-		newPart := Part{}
+		x, m, a, s := 0, 0, 0, 0
 		fmt.Sscanf(partStr, "{x=%d,m=%d,a=%d,s=%d}",
-			&newPart.x,
-			&newPart.m,
-			&newPart.a,
-			&newPart.s)
-		parts = append(parts, newPart)
+			&x,
+			&m,
+			&a,
+			&s)
+		parts = append(parts, Part{parameters: map[byte]int{
+			'x': x,
+			'm': m,
+			'a': a,
+			's': s}})
 	}
 
 	return workflows, parts
@@ -135,22 +171,60 @@ func SolvePart2(filePath string) (int, error) {
 		return 0, err
 	}
 
-	// find all rules where next = A
+	workflows, _ := parseInput(input)
 
-	// for each accept go through the rules and narrow down an interval:
+	rulePositions := []RulePos{}
+	for name, workflow := range workflows {
+		for i, rule := range workflow.rules {
+			if rule.next == "A" {
+				rulePositions = append(rulePositions, RulePos{name, i})
+			}
+		}
+	}
 
-	// 1. the current rule should be true
-	// 2. all the preceding rules need to be false
-	
-	// 3. if the workflow is "in" count the combinations and continue
+	acceptRanges := []PartRange{}
+	for _, rulePos := range rulePositions {
+		partRange := PartRange{ranges: map[byte][2]int{
+			'x': {1, 4000},
+			'm': {1, 4000},
+			'a': {1, 4000},
+			's': {1, 4000}}}
 
-	// 4. if it is not, find the rules that lead to the current workflow, on first glance it seems
-	// that each rule has exactly one preceding rule
+		for {
+			workflow := workflows[rulePos.name]
+			rule := workflow.rules[rulePos.pos]
 
-	// 5. the current workflow and rule are now the workflow and rule that lead here, go to 1.
+			partRange.adjust(rule, true)
+			for i := rulePos.pos - 1; i >= 0; i-- {
+				partRange.adjust(workflow.rules[i], false)
+			}
 
-	// add up the combinations, you may need a bigint
+			if rulePos.name == "in" {
+				acceptRanges = append(acceptRanges, partRange)
+				break
+			}
 
-	parseInput(input)
-	return 0, nil
+		out:
+			for name, workflow := range workflows {
+				for i, rule := range workflow.rules {
+					if rule.next == rulePos.name {
+						rulePos.name = name
+						rulePos.pos = i
+						break out
+					}
+				}
+			}
+		}
+	}
+
+	res := 0
+	for _, partRange := range acceptRanges {
+		partial := 1
+		for _, rn := range partRange.ranges {
+			partial *= rn[1] - rn[0] + 1
+		}
+		res += partial
+	}
+
+	return res, nil
 }
