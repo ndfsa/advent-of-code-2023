@@ -10,15 +10,15 @@ import (
 )
 
 const (
-	COLOR_RESET  = "\033[0m"
-	COLOR_BLACK   = "\033[30m"
-	COLOR_RED     = "\033[31m"
-	COLOR_GREEN   = "\033[32m"
-	COLOR_YELLOW  = "\033[33m"
-	COLOR_BLUE    = "\033[34m"
-	COLOR_MAGENTA = "\033[35m"
-	COLOR_CYAN    = "\033[36m"
-	COLOR_WHITE   = "\033[37m"
+	COLOR_RESET          = "\033[0m"
+	COLOR_BLACK          = "\033[30m"
+	COLOR_RED            = "\033[31m"
+	COLOR_GREEN          = "\033[32m"
+	COLOR_YELLOW         = "\033[33m"
+	COLOR_BLUE           = "\033[34m"
+	COLOR_MAGENTA        = "\033[35m"
+	COLOR_CYAN           = "\033[36m"
+	COLOR_WHITE          = "\033[37m"
 	COLOR_BRIGHT_BLACK   = "\033[90m"
 	COLOR_BRIGHT_RED     = "\033[91m"
 	COLOR_BRIGHT_GREEN   = "\033[92m"
@@ -106,6 +106,24 @@ func AbsDiff(x, y int) int {
 type Vec2 struct {
 	Row int
 	Col int
+}
+
+func (v Vec2) Neighbors(accept func(Vec2) bool) []Vec2 {
+	next := []Vec2{
+		DIR_UP,
+		DIR_RIGHT,
+		DIR_DOWN,
+		DIR_LEFT,
+	}
+
+	res := []Vec2{}
+	for _, dir := range next {
+		next := v.Add(dir)
+		if accept(next) {
+			res = append(res, next)
+		}
+	}
+	return res
 }
 
 var DIR_UP = Vec2{Row: -1, Col: 0}

@@ -3,7 +3,7 @@ package day17
 import (
 	"container/heap"
 	"errors"
- 
+
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
@@ -51,34 +51,29 @@ type State struct {
 }
 
 func (t Block) neighbors(field [][]byte, minSteps, maxSteps int) []Block {
-	next := []util.Vec2{
-		DIR_UP,
-		DIR_RIGHT,
-		DIR_DOWN,
-		DIR_LEFT,
-	}
-
+	neighbors := t.pos.Neighbors(func(v util.Vec2) bool {
+		return v.Row >= 0 &&
+			v.Row < len(field) &&
+			v.Col >= 0 &&
+			v.Col < len(field[0])
+	})
 	res := []Block{}
-	for _, dir := range next {
-		next := t.pos.Add(dir)
+	for _, neighbor := range neighbors {
 
-		if next.Row < 0 ||
-			next.Row >= len(field) ||
-			next.Col < 0 ||
-			next.Col >= len(field[0]) ||
-			t.dir == (util.Vec2{Row: -dir.Row, Col: -dir.Col}) {
+		dir := neighbor.Sus(t.pos)
+
+		if t.dir == (util.Vec2{Row: -dir.Row, Col: -dir.Col}) {
 			continue
 		}
-
 		if t.dir != dir && t.count >= minSteps {
 			res = append(res, Block{
-				pos:   next,
+				pos:   neighbor,
 				dir:   dir,
 				count: 1})
 		}
 		if t.dir == dir && t.count < maxSteps {
 			res = append(res, Block{
-				pos:   next,
+				pos:   neighbor,
 				dir:   dir,
 				count: t.count + 1})
 		}
