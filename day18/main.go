@@ -60,7 +60,7 @@ func calculateArea(vertices []Vertex) int {
 		prev := vertices[i-1].pos
 		curr := vertices[i].pos
 
-		boundary += curr.HammiltonDist(prev)
+		boundary += curr.HammingDist(prev)
 		area += curr.Row*prev.Col - prev.Row*curr.Col
 	}
 	area /= 2

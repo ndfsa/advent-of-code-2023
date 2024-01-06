@@ -54,9 +54,11 @@ func ReadFileSplit(filePath string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
+type Solution[T any] func(string) (T, error)
+
 func RunSolution[T comparable](
 	t *testing.T,
-	solution func(string) (T, error),
+	solution Solution[T],
 	filePath string,
 	expected T) {
 
@@ -139,7 +141,7 @@ func (p Vec2) AddMult(other Vec2, mag int) Vec2 {
 	return Vec2{Row: p.Row + other.Row*mag, Col: p.Col + other.Col*mag}
 }
 
-func (p Vec2) HammiltonDist(other Vec2) int {
+func (p Vec2) HammingDist(other Vec2) int {
 	sus := p.Sus(other)
 	res := 0
 
