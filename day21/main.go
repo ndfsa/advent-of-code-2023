@@ -1,13 +1,19 @@
 package day21
 
 import (
+	"math"
 	"strings"
 
 	"github.com/ndfsa/advent-of-code-2023/util"
 )
 
+type Tile struct {
+	pos    util.Vec2
+	offset util.Vec2
+}
+
 type Plot struct {
-	pos   util.Vec2
+	tile  Tile
 	steps int
 }
 
@@ -45,7 +51,7 @@ func solveP1(filePath string, dist int) (int, error) {
 
 	field, start := parseInput(lines)
 
-	queue := []Plot{{pos: start, steps: dist}}
+	queue := []Plot{{tile: Tile{pos: start}, steps: dist}}
 	visited := map[util.Vec2]struct{}{}
 
 	res := 0
@@ -57,15 +63,15 @@ func solveP1(filePath string, dist int) (int, error) {
 			continue
 		}
 
-		if _, seen := visited[next.pos]; seen {
+		if _, seen := visited[next.tile.pos]; seen {
 			continue
 		}
-		visited[next.pos] = struct{}{}
+		visited[next.tile.pos] = struct{}{}
 
 		if next.steps%2 == 0 {
 			res++
 		}
-		neighbors := next.pos.Neighbors(func(v util.Vec2) bool {
+		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
 			return v.Row >= 0 &&
 				v.Row < len(field) &&
 				v.Col >= 0 &&
@@ -74,11 +80,15 @@ func solveP1(filePath string, dist int) (int, error) {
 		})
 
 		for _, v := range neighbors {
-			queue = append(queue, Plot{pos: v, steps: next.steps - 1})
+			queue = append(queue, Plot{tile: Tile{pos: v}, steps: next.steps - 1})
 		}
 	}
 
 	return res, nil
+}
+
+func mod(x, m int) int {
+	return (x%m + m) % m
 }
 
 func SolvePart2(dist int) util.Solution[int] {
@@ -94,7 +104,52 @@ func solveP2(filePath string, dist int) (int, error) {
 		return 0, err
 	}
 
-	parseInput(lines)
+	field, start := parseInput(lines)
 
-	return 0, nil
+	rows := len(field)
+	cols := len(field[0])
+
+	queue := []Plot{{tile: Tile{pos: start}, steps: dist}}
+	visited := map[Tile]struct{}{}
+	answer := map[Tile]struct{}{}
+
+	for len(queue) > 0 {
+		next := queue[0]
+		queue = queue[1:]
+
+		if next.steps < 0 {
+			continue
+		}
+
+		if _, seen := visited[next.tile]; seen {
+			continue
+		}
+		visited[next.tile] = struct{}{}
+
+		if next.steps%2 == 0 {
+			answer[next.tile] = struct{}{}
+		}
+
+		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
+			r := mod(v.Row, rows)
+			c := mod(v.Col, cols)
+			return field[r][c] != '#'
+		})
+
+		for _, v := range neighbors {
+			tile := Tile{
+				pos: util.Vec2{
+					Row: mod(v.Row, rows),
+					Col: mod(v.Col, cols),
+				},
+				offset: next.tile.offset.Add(
+					util.Vec2{
+						Row: int(math.Floor(float64(v.Row) / float64(rows))),
+						Col: int(math.Floor(float64(v.Col) / float64(cols)))})}
+
+			queue = append(queue, Plot{tile: tile, steps: next.steps - 1})
+		}
+	}
+
+	return len(answer), nil
 }
