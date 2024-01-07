@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	DIR_NORTH = util.DIR_UP
-	DIR_SOUTH = util.DIR_DOWN
-	DIR_EAST  = util.DIR_RIGHT
-	DIR_WEST  = util.DIR_LEFT
+	DIR_NORTH = util.DIR_V2_NEG_X
+	DIR_SOUTH = util.DIR_V2_POS_X
+	DIR_EAST  = util.DIR_V2_POS_Y
+	DIR_WEST  = util.DIR_V2_NEG_Y
 )
 
 const (
@@ -50,10 +50,10 @@ func (d *Dish) calculateLoad() int {
 }
 
 func (d Dish) valid(pos util.Vec2) bool {
-	return pos.Row >= 0 &&
-		pos.Row < d.height &&
-		pos.Col >= 0 &&
-		pos.Col < d.width
+	return pos.X >= 0 &&
+		pos.X < d.height &&
+		pos.Y >= 0 &&
+		pos.Y < d.width
 }
 
 func (d *Dish) tilt(direction util.Vec2) {
@@ -70,30 +70,30 @@ func (d *Dish) tilt(direction util.Vec2) {
 	}
 	for i >= 0 && i < d.height && j >= 0 && j < d.width {
 
-		pos := util.Vec2{Row: i, Col: j}
+		pos := util.Vec2{X: i, Y: j}
 		if d.rocks[i][j] == TYPE_ROUNDED {
 			nextPos := pos.Add(direction)
 
-			for d.valid(nextPos) && d.rocks[nextPos.Row][nextPos.Col] == TYPE_EMPTY {
+			for d.valid(nextPos) && d.rocks[nextPos.X][nextPos.Y] == TYPE_EMPTY {
 				nextPos = nextPos.Add(direction)
 			}
 			nextPos = nextPos.Sus(direction)
 
 			d.rocks[i][j] = TYPE_EMPTY
-			d.rocks[nextPos.Row][nextPos.Col] = TYPE_ROUNDED
+			d.rocks[nextPos.X][nextPos.Y] = TYPE_ROUNDED
 		}
 
 		switch direction {
 		case DIR_NORTH, DIR_SOUTH:
 			j++
 			if j == d.width {
-				i -= direction.Row
+				i -= direction.X
 				j = 0
 			}
 		case DIR_EAST, DIR_WEST:
 			i++
 			if i == d.height {
-				j -= direction.Col
+				j -= direction.Y
 				i = 0
 			}
 		}

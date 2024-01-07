@@ -15,10 +15,10 @@ const (
 )
 
 var (
-	DIR_UP    = util.DIR_UP
-	DIR_DOWN  = util.DIR_DOWN
-	DIR_RIGHT = util.DIR_RIGHT
-	DIR_LEFT  = util.DIR_LEFT
+	DIR_UP    = util.DIR_V2_NEG_X
+	DIR_DOWN  = util.DIR_V2_POS_X
+	DIR_RIGHT = util.DIR_V2_POS_Y
+	DIR_LEFT  = util.DIR_V2_NEG_Y
 )
 
 type Photon struct {
@@ -43,18 +43,18 @@ func (p Photon) String() string {
 
 func (l Photon) move(field [][]byte) []Photon {
 	newPhotons := []Photon{}
-	instruction := field[l.pos.Row][l.pos.Col]
+	instruction := field[l.pos.X][l.pos.Y]
 
 	switch instruction {
 	case TYPE_EMPTY:
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_MIRROR:
-		l.dir = util.Vec2{Row: -l.dir.Col, Col: -l.dir.Row}
+		l.dir = util.Vec2{X: -l.dir.Y, Y: -l.dir.X}
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_MIRROR_BACK:
-		l.dir = util.Vec2{Row: l.dir.Col, Col: l.dir.Row}
+		l.dir = util.Vec2{X: l.dir.Y, Y: l.dir.X}
 		l.pos = l.pos.Add(l.dir)
 		newPhotons = append(newPhotons, l)
 	case TYPE_SPLITTER_H:
@@ -79,10 +79,10 @@ func (l Photon) move(field [][]byte) []Photon {
 
 	res := []Photon{}
 	for _, photon := range newPhotons {
-		if 0 <= photon.pos.Row &&
-			photon.pos.Row < len(field) &&
-			0 <= photon.pos.Col &&
-			photon.pos.Col < len(field[0]) {
+		if 0 <= photon.pos.X &&
+			photon.pos.X < len(field) &&
+			0 <= photon.pos.Y &&
+			photon.pos.Y < len(field[0]) {
 
 			res = append(res, photon)
 		}
@@ -109,7 +109,7 @@ func SolvePart1(filePath string) (int, error) {
 
 	field := parseInput(lines)
 
-	queue := map[Photon]struct{}{{pos: util.Vec2{Row: 0, Col: 0}, dir: DIR_RIGHT}: {}}
+	queue := map[Photon]struct{}{{pos: util.Vec2{X: 0, Y: 0}, dir: DIR_RIGHT}: {}}
 	next := map[Photon][]Photon{}
 
 	for len(queue) > 0 {
@@ -147,15 +147,15 @@ func SolvePart2(filePath string) (int, error) {
 	startPhotons := []Photon{}
 	for i := 0; i < len(field); i++ {
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Vec2{Row: i, Col: 0}, dir: DIR_RIGHT})
+			Photon{pos: util.Vec2{X: i, Y: 0}, dir: DIR_RIGHT})
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Vec2{Row: i, Col: len(field[0]) - 1}, dir: DIR_LEFT})
+			Photon{pos: util.Vec2{X: i, Y: len(field[0]) - 1}, dir: DIR_LEFT})
 	}
 	for i := 0; i < len(field[0]); i++ {
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Vec2{Row: 0, Col: i}, dir: DIR_DOWN})
+			Photon{pos: util.Vec2{X: 0, Y: i}, dir: DIR_DOWN})
 		startPhotons = append(startPhotons,
-			Photon{pos: util.Vec2{Row: len(field) - 1, Col: i}, dir: DIR_UP})
+			Photon{pos: util.Vec2{X: len(field) - 1, Y: i}, dir: DIR_UP})
 	}
 
 	cache := map[Photon][]Photon{}

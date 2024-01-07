@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	DIR_UP    = util.DIR_UP
-	DIR_DOWN  = util.DIR_DOWN
-	DIR_RIGHT = util.DIR_RIGHT
-	DIR_LEFT  = util.DIR_LEFT
+	DIR_UP    = util.DIR_V2_NEG_X
+	DIR_DOWN  = util.DIR_V2_POS_X
+	DIR_RIGHT = util.DIR_V2_POS_Y
+	DIR_LEFT  = util.DIR_V2_NEG_Y
 )
 
 type Vertex struct {
@@ -61,7 +61,7 @@ func calculateArea(vertices []Vertex) int {
 		curr := vertices[i].pos
 
 		boundary += curr.HammingDist(prev)
-		area += curr.Row*prev.Col - prev.Row*curr.Col
+		area += curr.X*prev.Y - prev.X*curr.Y
 	}
 	area /= 2
 

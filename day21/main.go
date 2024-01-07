@@ -33,7 +33,7 @@ func parseInput(lines []string) ([][]byte, util.Vec2) {
 		res = append(res, []byte(line))
 	}
 
-	return res, util.Vec2{Row: row, Col: col}
+	return res, util.Vec2{X: row, Y: col}
 }
 
 func SolvePart1(dist int) util.Solution[int] {
@@ -72,11 +72,11 @@ func solveP1(filePath string, dist int) (int, error) {
 			res++
 		}
 		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
-			return v.Row >= 0 &&
-				v.Row < len(field) &&
-				v.Col >= 0 &&
-				v.Col < len(field[0]) &&
-				field[v.Row][v.Col] != '#'
+			return v.X >= 0 &&
+				v.X < len(field) &&
+				v.Y >= 0 &&
+				v.Y < len(field[0]) &&
+				field[v.X][v.Y] != '#'
 		})
 
 		for _, v := range neighbors {
@@ -131,21 +131,21 @@ func solveP2(filePath string, dist int) (int, error) {
 		}
 
 		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
-			r := mod(v.Row, rows)
-			c := mod(v.Col, cols)
+			r := mod(v.X, rows)
+			c := mod(v.Y, cols)
 			return field[r][c] != '#'
 		})
 
 		for _, v := range neighbors {
 			tile := Tile{
 				pos: util.Vec2{
-					Row: mod(v.Row, rows),
-					Col: mod(v.Col, cols),
+					X: mod(v.X, rows),
+					Y: mod(v.Y, cols),
 				},
 				offset: next.tile.offset.Add(
 					util.Vec2{
-						Row: int(math.Floor(float64(v.Row) / float64(rows))),
-						Col: int(math.Floor(float64(v.Col) / float64(cols)))})}
+						X: int(math.Floor(float64(v.X) / float64(rows))),
+						Y: int(math.Floor(float64(v.Y) / float64(cols)))})}
 
 			queue = append(queue, Plot{tile: tile, steps: next.steps - 1})
 		}

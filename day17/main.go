@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	DIR_UP    = util.DIR_UP
-	DIR_DOWN  = util.DIR_DOWN
-	DIR_RIGHT = util.DIR_RIGHT
-	DIR_LEFT  = util.DIR_LEFT
+	DIR_UP    = util.DIR_V2_NEG_X
+	DIR_DOWN  = util.DIR_V2_POS_X
+	DIR_RIGHT = util.DIR_V2_POS_Y
+	DIR_LEFT  = util.DIR_V2_NEG_Y
 )
 
 type StateHeap []State
@@ -52,17 +52,17 @@ type State struct {
 
 func (t Block) neighbors(field [][]byte, minSteps, maxSteps int) []Block {
 	neighbors := t.pos.Neighbors(func(v util.Vec2) bool {
-		return v.Row >= 0 &&
-			v.Row < len(field) &&
-			v.Col >= 0 &&
-			v.Col < len(field[0])
+		return v.X >= 0 &&
+			v.X < len(field) &&
+			v.Y >= 0 &&
+			v.Y < len(field[0])
 	})
 	res := []Block{}
 	for _, neighbor := range neighbors {
 
 		dir := neighbor.Sus(t.pos)
 
-		if t.dir == (util.Vec2{Row: -dir.Row, Col: -dir.Col}) {
+		if t.dir == (util.Vec2{X: -dir.X, Y: -dir.Y}) {
 			continue
 		}
 		if t.dir != dir && t.count >= minSteps {
@@ -104,8 +104,8 @@ func SolvePart1(filePath string) (int, error) {
 }
 
 func minPath(cityBlocks [][]byte, minSteps int, maxSteps int) (int, error) {
-	start := util.Vec2{Row: 0, Col: 0}
-	end := util.Vec2{Row: len(cityBlocks) - 1, Col: len(cityBlocks[0]) - 1}
+	start := util.Vec2{X: 0, Y: 0}
+	end := util.Vec2{X: len(cityBlocks) - 1, Y: len(cityBlocks[0]) - 1}
 
 	visited := map[Block]struct{}{}
 
@@ -127,7 +127,7 @@ func minPath(cityBlocks [][]byte, minSteps int, maxSteps int) (int, error) {
 		visited[state.block] = struct{}{}
 
 		for _, neighbor := range state.block.neighbors(cityBlocks, minSteps, maxSteps) {
-			newCost := int(cityBlocks[neighbor.pos.Row][neighbor.pos.Col]) + state.loss
+			newCost := int(cityBlocks[neighbor.pos.X][neighbor.pos.Y]) + state.loss
 			heap.Push(queue, State{block: neighbor, loss: newCost})
 		}
 	}

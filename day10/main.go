@@ -13,18 +13,18 @@ type Blueprint struct {
 
 func (b Blueprint) getPipe(p util.Vec2) (byte, error) {
 	rowMax, colMax := len(b.data), len(b.data[0])
-	if p.Row < 0 || p.Row >= rowMax || p.Col < 0 || p.Col >= colMax {
+	if p.X < 0 || p.X >= rowMax || p.Y < 0 || p.Y >= colMax {
 		return 0, errors.New("invalid position")
 	}
 
-	return b.data[p.Row][p.Col], nil
+	return b.data[p.X][p.Y], nil
 }
 
 func (b Blueprint) getStartAdjacent() (util.Vec2, util.Vec2, util.Vec2) {
 	var pipesStart util.Vec2
 	for idx, row := range b.data {
 		if col := strings.IndexByte(row, 'S'); col != -1 {
-			pipesStart = util.Vec2{Row: idx, Col: col}
+			pipesStart = util.Vec2{X: idx, Y: col}
 			break
 		}
 	}
@@ -36,10 +36,10 @@ func (b Blueprint) findNext(p util.Vec2) []util.Vec2 {
 	currentPipe, _ := b.getPipe(p)
 
 	possibleNext := []util.Vec2{
-		{Row: p.Row - 1, Col: p.Col},
-		{Row: p.Row + 1, Col: p.Col},
-		{Row: p.Row, Col: p.Col - 1},
-		{Row: p.Row, Col: p.Col + 1},
+		{X: p.X - 1, Y: p.Y},
+		{X: p.X + 1, Y: p.Y},
+		{X: p.X, Y: p.Y - 1},
+		{X: p.X, Y: p.Y + 1},
 	}
 
 	next := []util.Vec2{}
@@ -49,16 +49,16 @@ func (b Blueprint) findNext(p util.Vec2) []util.Vec2 {
 		if err != nil {
 			continue
 		}
-		if np.Row < p.Row && (pipe == '|' || pipe == '7' || pipe == 'F') &&
+		if np.X < p.X && (pipe == '|' || pipe == '7' || pipe == 'F') &&
 			(currentPipe == 'S' || currentPipe == '|' || currentPipe == 'J' || currentPipe == 'L') {
 			next = append(next, np)
-		} else if np.Row > p.Row && (pipe == '|' || pipe == 'L' || pipe == 'J') &&
+		} else if np.X > p.X && (pipe == '|' || pipe == 'L' || pipe == 'J') &&
 			(currentPipe == 'S' || currentPipe == '|' || currentPipe == '7' || currentPipe == 'F') {
 			next = append(next, np)
-		} else if np.Col < p.Col && (pipe == '-' || pipe == 'L' || pipe == 'F') &&
+		} else if np.Y < p.Y && (pipe == '-' || pipe == 'L' || pipe == 'F') &&
 			(currentPipe == 'S' || currentPipe == '-' || currentPipe == '7' || currentPipe == 'J') {
 			next = append(next, np)
-		} else if np.Col > p.Col && (pipe == '-' || pipe == '7' || pipe == 'J') &&
+		} else if np.Y > p.Y && (pipe == '-' || pipe == '7' || pipe == 'J') &&
 			(currentPipe == 'S' || currentPipe == '-' || currentPipe == 'L' || currentPipe == 'F') {
 			next = append(next, np)
 		}
@@ -133,7 +133,7 @@ func SolvePart2(filePath string) (int, error) {
 	for i := 0; i < len(state.previous); i++ {
 		prev := state.previous[curr]
 
-		area += curr.Row*prev.Col - prev.Row*curr.Col
+		area += curr.X*prev.Y - prev.X*curr.Y
 
 		curr = prev
 	}

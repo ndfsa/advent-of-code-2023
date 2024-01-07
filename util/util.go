@@ -105,65 +105,6 @@ func AbsDiff(x, y int) int {
 	return y - x
 }
 
-type Vec2 struct {
-	Row int
-	Col int
-}
-
-func (v Vec2) Neighbors(accept func(Vec2) bool) []Vec2 {
-	next := []Vec2{
-		DIR_UP,
-		DIR_RIGHT,
-		DIR_DOWN,
-		DIR_LEFT,
-	}
-
-	res := []Vec2{}
-	for _, dir := range next {
-		next := v.Add(dir)
-		if accept(next) {
-			res = append(res, next)
-		}
-	}
-	return res
-}
-
-var DIR_UP = Vec2{Row: -1, Col: 0}
-var DIR_DOWN = Vec2{Row: 1, Col: 0}
-var DIR_RIGHT = Vec2{Row: 0, Col: 1}
-var DIR_LEFT = Vec2{Row: 0, Col: -1}
-
-func (p Vec2) Add(other Vec2) Vec2 {
-	return Vec2{Row: p.Row + other.Row, Col: p.Col + other.Col}
-}
-
-func (p Vec2) AddMult(other Vec2, mag int) Vec2 {
-	return Vec2{Row: p.Row + other.Row*mag, Col: p.Col + other.Col*mag}
-}
-
-func (p Vec2) HammingDist(other Vec2) int {
-	sus := p.Sus(other)
-	res := 0
-
-	if sus.Row < 0 {
-		res += -sus.Row
-	} else {
-		res += sus.Row
-	}
-
-	if sus.Col < 0 {
-		res += -sus.Col
-	} else {
-		res += sus.Col
-	}
-
-	return res
-}
-
-func (p Vec2) Sus(other Vec2) Vec2 {
-	return Vec2{Row: p.Row - other.Row, Col: p.Col - other.Col}
-}
-
 func SlicesEqual[T comparable](a, b []T) bool {
 	if len(a) != len(b) {
 		return false
