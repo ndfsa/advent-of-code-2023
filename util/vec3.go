@@ -1,5 +1,7 @@
 package util
 
+import "math"
+
 type Vec3 struct {
 	X int
 	Y int
@@ -24,6 +26,19 @@ func (v Vec3) Neighbors(accept func(Vec3) bool) []Vec3 {
 		}
 	}
 	return res
+}
+
+func (v Vec3) Unit() Vec3 {
+	if v.X != 0 {
+		v.X /= int(math.Abs(float64(v.X)))
+	}
+	if v.Y != 0 {
+		v.Y /= int(math.Abs(float64(v.Y)))
+	}
+	if v.Z != 0 {
+		v.Z /= int(math.Abs(float64(v.Z)))
+	}
+	return v
 }
 
 var DIR_V3_POS_X = Vec3{X: 1, Y: 0, Z: 0}
