@@ -5,7 +5,7 @@ type Vec2 struct {
 	Y int
 }
 
-func (v Vec2) Neighbors(accept func(Vec2) bool) []Vec2 {
+func (v Vec2) Neighbors(accept func(v Vec2, dir Vec2) bool) []Vec2 {
 	next := []Vec2{
 		DIR_V2_NEG_X,
 		DIR_V2_POS_Y,
@@ -16,7 +16,7 @@ func (v Vec2) Neighbors(accept func(Vec2) bool) []Vec2 {
 	res := []Vec2{}
 	for _, dir := range next {
 		next := v.Add(dir)
-		if accept(next) {
+		if accept(next, dir) {
 			res = append(res, next)
 		}
 	}

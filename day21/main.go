@@ -71,7 +71,7 @@ func solveP1(filePath string, dist int) (int, error) {
 		if next.steps%2 == 0 {
 			res++
 		}
-		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
+		neighbors := next.tile.pos.Neighbors(func(v util.Vec2, dir util.Vec2) bool {
 			return v.X >= 0 &&
 				v.X < len(field) &&
 				v.Y >= 0 &&
@@ -130,7 +130,7 @@ func solveP2(filePath string, dist int) (int, error) {
 			answer[next.tile] = struct{}{}
 		}
 
-		neighbors := next.tile.pos.Neighbors(func(v util.Vec2) bool {
+		neighbors := next.tile.pos.Neighbors(func(v util.Vec2, dir util.Vec2) bool {
 			r := mod(v.X, rows)
 			c := mod(v.Y, cols)
 			return field[r][c] != '#'

@@ -14,44 +14,14 @@ var (
 	DIR_LEFT  = util.DIR_V2_NEG_Y
 )
 
-type StateHeap []State
-
-func (b StateHeap) Len() int {
-	return len(b)
-}
-
-func (b StateHeap) Less(i, j int) bool {
-	return b[i].loss < b[j].loss
-}
-
-func (b *StateHeap) Swap(i, j int) {
-	(*b)[i], (*b)[j] = (*b)[j], (*b)[i]
-}
-
-func (b *StateHeap) Push(element any) {
-	*b = append(*b, element.(State))
-}
-
-func (b *StateHeap) Pop() any {
-	length := len(*b)
-	res := (*b)[length-1]
-	*b = (*b)[:length-1]
-	return res
-}
-
 type Block struct {
 	pos   util.Vec2
 	dir   util.Vec2
 	count int
 }
 
-type State struct {
-	block Block
-	loss  int
-}
-
 func (t Block) neighbors(field [][]byte, minSteps, maxSteps int) []Block {
-	neighbors := t.pos.Neighbors(func(v util.Vec2) bool {
+	neighbors := t.pos.Neighbors(func(v util.Vec2, d util.Vec2) bool {
 		return v.X >= 0 &&
 			v.X < len(field) &&
 			v.Y >= 0 &&
@@ -109,26 +79,26 @@ func minPath(cityBlocks [][]byte, minSteps int, maxSteps int) (int, error) {
 
 	visited := map[Block]struct{}{}
 
-	queue := &StateHeap{}
+	queue := &util.StateHeap[Block]{}
 	heap.Init(queue)
-	heap.Push(queue, State{block: Block{pos: start, dir: DIR_RIGHT}})
-	heap.Push(queue, State{block: Block{pos: start, dir: DIR_DOWN}})
+	heap.Push(queue, util.State[Block]{Vertex: Block{pos: start, dir: DIR_RIGHT}})
+	heap.Push(queue, util.State[Block]{Vertex: Block{pos: start, dir: DIR_DOWN}})
 
 	for queue.Len() > 0 {
-		state := heap.Pop(queue).(State)
+		state := heap.Pop(queue).(util.State[Block])
 
-		if state.block.pos == end && state.block.count >= minSteps {
-			return state.loss, nil
+		if state.Vertex.pos == end && state.Vertex.count >= minSteps {
+			return state.Cost, nil
 		}
 
-		if _, ok := visited[state.block]; ok {
+		if _, ok := visited[state.Vertex]; ok {
 			continue
 		}
-		visited[state.block] = struct{}{}
+		visited[state.Vertex] = struct{}{}
 
-		for _, neighbor := range state.block.neighbors(cityBlocks, minSteps, maxSteps) {
-			newCost := int(cityBlocks[neighbor.pos.X][neighbor.pos.Y]) + state.loss
-			heap.Push(queue, State{block: neighbor, loss: newCost})
+		for _, neighbor := range state.Vertex.neighbors(cityBlocks, minSteps, maxSteps) {
+			newCost := int(cityBlocks[neighbor.pos.X][neighbor.pos.Y]) + state.Cost
+			heap.Push(queue, util.State[Block]{Vertex: neighbor, Cost: newCost})
 		}
 	}
 
