@@ -1,12 +1,12 @@
 package day24
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
 	"github.com/ndfsa/advent-of-code-2023/util"
 	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/optimize"
 )
 
 type HailStone struct {
@@ -81,29 +81,6 @@ func solveP1(filePath string, mn, mx float64) (int, error) {
 	return res, nil
 }
 
-func buildObjective(p1, p2, p3, v1, v2, v3 util.FVec3) func([]float64) float64 {
-	return func(v []float64) float64 {
-		// Unpack variables
-		k0x, k0y, k0z, vx, vy, vz, t1, t2, t3 := v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]
-
-		// Define the system of equations
-		eq1 := k0x + vx*t1 - v1.X*t1 - p1.X
-		eq2 := k0y + vy*t1 - v1.Y*t1 - p1.Y
-		eq3 := k0z + vz*t1 - v1.Z*t1 - p1.Z
-
-		eq4 := k0x + vx*t2 - v2.X*t2 - p2.X
-		eq5 := k0y + vy*t2 - v2.Y*t2 - p2.Y
-		eq6 := k0z + vz*t2 - v2.Z*t2 - p2.Z
-
-		eq7 := k0x + vx*t3 - v3.X*t3 - p3.X
-		eq8 := k0y + vy*t3 - v3.Y*t3 - p3.Y
-		eq9 := k0z + vz*t3 - v3.Z*t3 - p3.Z
-
-		// Return the sum of squared errors
-		return eq1*eq1 + eq2*eq2 + eq3*eq3 + eq4*eq4 + eq5*eq5 + eq6*eq6 + eq7*eq7 + eq8*eq8 + eq9*eq9
-	}
-}
-
 func SolvePart2(filePath string) (int, error) {
 	lines, err := util.ReadFileSplit(filePath)
 
@@ -113,27 +90,31 @@ func SolvePart2(filePath string) (int, error) {
 
 	hailStones := parseInput(lines)
 
-	P1 := hailStones[0]
-	P2 := hailStones[1]
-	P3 := hailStones[2]
+	A := mat.NewDense(10, 10, nil)
+	b := mat.NewVecDense(10, nil)
 
-	p1 := P1.P
-	v1 := P1.V
+	for i := 0; i < 10; i += 2 {
+		p := hailStones[i/2].P
+		u := hailStones[i/2].V
+		A.SetRow(i, []float64{-u.Y, u.X, 0, p.Y, -p.X, 0, -1, 1, 0, 0})
+		b.SetVec(i, u.X*p.Y-u.Y*p.X)
 
-	v2 := P2.V
-	p2 := P2.P
-
-	p3 := P3.P
-	v3 := P3.V
-
-	initialGuess := []float64{1, 1, 1, 1, 1, 1, 1, 1, 1}
-
-	problem := optimize.Problem{Func: buildObjective(p1, p2, p3, v1, v2, v3)}
-
-	result, err := optimize.Minimize(problem, initialGuess, nil, nil)
-	if err != nil {
-		return 0, err
+		A.SetRow(i+1, []float64{0, -u.Z, u.Y, 0, p.Z, -p.Y, 0, 0, -1, 1})
+		b.SetVec(i+1, u.Y*p.Z-u.Z*p.Y)
 	}
 
-	return int(math.Round(result.X[0] + result.X[1] + result.X[2])), nil
+	var svd mat.SVD
+	if ok := svd.Factorize(A, mat.SVDFull); !ok {
+		fmt.Println("failed to factorize")
+	}
+
+	if rank := svd.Rank(1e-50); rank != 0 {
+		var sol mat.Dense
+		svd.SolveTo(&sol, b, rank)
+
+		return int(math.Round(sol.At(0, 0) + sol.At(1, 0) + sol.At(2, 0))), nil
+
+	}
+
+	return 0, errors.New("zero rank system")
 }
