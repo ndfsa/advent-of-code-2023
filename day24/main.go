@@ -1,9 +1,7 @@
 package day24
 
 import (
-	"errors"
 	"fmt"
-	"math"
 
 	"github.com/ndfsa/advent-of-code-2023/util"
 	"gonum.org/v1/gonum/mat"
@@ -90,31 +88,50 @@ func SolvePart2(filePath string) (int, error) {
 
 	hailStones := parseInput(lines)
 
-	A := mat.NewDense(10, 10, nil)
-	b := mat.NewVecDense(10, nil)
+	A := mat.NewDense(4, 4, nil)
+	b := mat.NewVecDense(4, nil)
 
-	for i := 0; i < 10; i += 2 {
-		p := hailStones[i/2].P
-		u := hailStones[i/2].V
-		A.SetRow(i, []float64{-u.Y, u.X, 0, p.Y, -p.X, 0, -1, 1, 0, 0})
-		b.SetVec(i, u.X*p.Y-u.Y*p.X)
+	for i := 0; i < 4; i++ {
+		p1 := hailStones[i].P
+		u1 := hailStones[i].V
+		p2 := hailStones[i+1].P
+		u2 := hailStones[i+1].V
 
-		A.SetRow(i+1, []float64{0, -u.Z, u.Y, 0, p.Z, -p.Y, 0, 0, -1, 1})
-		b.SetVec(i+1, u.Y*p.Z-u.Z*p.Y)
+		A.SetRow(i, []float64{-u1.Y + u2.Y, u1.X - u2.X, p1.Y - p2.Y, -p1.X + p2.X})
+		b.SetVec(i, u1.X*p1.Y-u1.Y*p1.X-u2.X*p2.Y+u2.Y*p2.X)
 	}
 
-	var svd mat.SVD
-	if ok := svd.Factorize(A, mat.SVDFull); !ok {
-		fmt.Println("failed to factorize")
+	var solXY mat.VecDense
+	if err := solXY.SolveVec(A, b); err != nil {
+		return 0, err
 	}
 
-	if rank := svd.Rank(1e-50); rank != 0 {
-		var sol mat.Dense
-		svd.SolveTo(&sol, b, rank)
+	A = mat.NewDense(2, 2, nil)
+	b = mat.NewVecDense(2, nil)
+	for i := 0; i < 2; i++ {
+		kx := solXY.At(0, 0)
+		vx := solXY.At(2, 0)
 
-		return int(math.Round(sol.At(0, 0) + sol.At(1, 0) + sol.At(2, 0))), nil
+		px := hailStones[i].P.X
+		pz := hailStones[i].P.Z
 
+		ux := hailStones[i].V.X
+		uz := hailStones[i].V.Z
+
+		tn := (px - kx) / (vx - ux)
+
+		A.SetRow(i, []float64{1, tn})
+		b.SetVec(i, pz+uz*tn)
 	}
 
-	return 0, errors.New("zero rank system")
+	var solZ mat.VecDense
+	if err := solZ.SolveVec(A, b); err != nil {
+		return 0, err
+	}
+
+	kx := solXY.At(0, 0)
+	ky := solXY.At(1, 0)
+	kz := solZ.At(0, 0)
+
+	return int(kx + ky + kz), nil
 }

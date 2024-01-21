@@ -19,6 +19,5 @@ func TestSolvePart2Example(t *testing.T) {
 }
 
 func TestSolvePart2(t *testing.T) {
-	t.Skip()
 	util.RunSolution(t, SolvePart2, "./input.txt", 781390555762385)
 }
